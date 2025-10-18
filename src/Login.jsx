@@ -48,7 +48,7 @@ const handleSubmit = async (e) => {
     setError('يرجى إدخال اسم المستخدم وكلمة المرور');
     return;
   }
-
+alert("hello");
   try {
     const data = await emp(); // جلب بيانات الموظفين من الدالة emp()
     alert(data);
