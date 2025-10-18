@@ -748,11 +748,7 @@ const removeReportedReporters = (id) => {
         }
       : undefined,
     
-    muiTableContainerProps: {
-      sx: {
-        maxHeight: '600px',
-      },
-    },
+
     onCreatingRowCancel: () => setValidationErrors({}),
   //  onCreatingRowSave:(values,table) =>{ handleCreateReport(values,table,report) },
     onEditingRowCancel: () => setValidationErrors({}),
@@ -764,7 +760,7 @@ const removeReportedReporters = (id) => {
       setSelectedMainType(row.original.main_id);
     },
     
-    enableEditing: true,
+
 
     // محتوى نافذة الإنشاء
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
