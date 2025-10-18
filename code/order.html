@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جلب بيانات SHIB/USDT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+            width: 90%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+        }
+        th {
+            background-color: #eee;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+        #currentPrice {
+            font-size: 24px;
+            color: green;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>البيانات من MEXC</h2>
+
+<!-- عرض السعر الحالي -->
+<div id="currentPrice">السعر الحالي: ...</div>
+
+<h3>العروض (Asks)</h3>
+<table id="asksTable">
+    <thead>
+        <tr>
+            <th>السعر</th>
+            <th>الكمية</th>
+            <th>المجموع</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<h3>الطلبات (Bids)</h3>
+<table id="bidsTable">
+    <thead>
+        <tr>
+            <th>السعر</th>
+            <th>الكمية</th>
+            <th>المجموع</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<div id="totalsDisplay" style="margin-top: 30px;"></div>
+
+<script>
+    const apiURL = 'https://api.mexc.com/api/v3/depth?symbol=SHIBUSDT&limit=12';
+    const proxyURL = 'http://localhost:8089/proxy.php?url=' + encodeURIComponent(apiURL);
+
+    const priceURL = 'https://api.mexc.com/api/v3/ticker/price?symbol=SHIBUSDT';
+    const priceProxyURL = 'http://localhost:8089/proxy.php?url=' + encodeURIComponent(priceURL);
+
+    // دالة تنسيق الكمية فقط (K / M)
+    function formatNumber(num) {
+        if (num >= 1_000_000) {
+            return (num / 1_000_000).toFixed(2) + 'M';
+        } else if (num >= 1_000) {
+            return (num / 1_000).toFixed(2) + 'K';
+        } else {
+            return num.toFixed(0);
+        }
+    }
+
+    function displayTable(tableId, rows) {
+        const tbody = document.getElementById(tableId).querySelector('tbody');
+        tbody.innerHTML = ''; // مسح البيانات القديمة
+
+        rows.forEach(row => {
+            const price = parseFloat(row[0]);
+            const amount = parseFloat(row[1]);
+            const total = price * amount;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${price.toFixed(8)}</td>
+                <td>${formatNumber(amount)}</td>
+                <td>${total.toFixed(6)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    // جلب البيانات هنا
+    async function fetchData() {
+        try {
+            const response = await fetch(proxyURL);
+            const data = await response.json();
+
+            displayTable('asksTable', data.asks);
+            displayTable('bidsTable', data.bids);
+           calculateTotals(data.bids, data.asks);
+        } catch (error) {
+            document.body.innerHTML += '<p style="color:red;">خطأ: ' + error + '</p>';
+        }
+    }
+
+function calculateTotals(bids, asks) {
+    const totalBids = bids.reduce((sum, [price, qty]) => sum + price * qty, 0);
+    const totalAsks = asks.reduce((sum, [price, qty]) => sum + price * qty, 0);
+    const totalAll = totalBids + totalAsks;
+
+    document.getElementById('totalsDisplay').innerHTML = `
+        <h3>📊 ملخص الإجماليات</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>النوع</th>
+                    <th>الإجمالي (USDT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>إجمالي الطلبات (Bids)</td>
+                    <td>${formatNumber(totalBids)}</td>
+                </tr>
+                <tr>
+                    <td>إجمالي العروض (Asks)</td>
+                    <td>${formatNumber(totalAsks)}</td>
+                </tr>
+                <tr>
+                    <td><strong>الإجمالي الكلي</strong></td>
+                    <td><strong>${formatNumber(totalAll)}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+}
+    async function fetchCurrentPrice() {
+        try {
+            const res = await fetch(priceProxyURL);
+            const data = await res.json();
+            document.getElementById('currentPrice').textContent = `السعر الحالي: ${parseFloat(data.price).toFixed(8)} USDT`;
+        } catch (err) {
+            document.getElementById('currentPrice').textContent = 'تعذر جلب السعر الحالي';
+        }
+    }
+
+    fetchData(); // أول مرة
+    fetchCurrentPrice(); // أول مرة
+
+    setInterval(fetchData, 1000);        // تحديث جدول الطلبات/العروض كل ثانية
+    setInterval(fetchCurrentPrice, 1000); // تحديث السعر الحالي كل ثانية
+</script>
+
+</body>
+</html>

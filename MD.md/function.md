@@ -1,0 +1,9 @@
+fetchReportMainTypes();
+id
+type_name
+_____________
+تقارير ملخصة
+getPoliceDepartmentsReportsSummary
+تقارير تفصيلية
+getPoliceDepartmentsReports
+getPoliceDepartmentsPeriodicReports

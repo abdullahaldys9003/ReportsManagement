@@ -1,0 +1,303 @@
+
+import React, { useState, useEffect } from 'react';
+import { BarChart, PieChart, LineChart } from '@mui/x-charts';
+import axios from 'axios'
+import { 
+  Grid, 
+  Card, 
+  CardContent, 
+  Typography, 
+  Box, 
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material';
+
+
+import { ho } from "../hosts";
+const getDepartment_statistics_3 = async () => {
+  const response = await axios.get(`http://${ho}:8084`, {
+    params: { tableName: "department_statistics", operation: "show_3" }
+  });
+  return response.data;
+};
+
+
+const HomePage = () => {
+  // بيانات وهمية للعرض
+  const [stats, setStats] = useState({
+    totalReports: 0,
+    openReports: 0,
+    inProgressReports: 0,
+    closedReports: 0,
+    totalDepartments: 0,
+    totalEmployees: 0
+  });
+  const [data, setData] = useState([]);
+  const [reportTypesData, setReportTypesData] = useState([]);
+  const [reportStatusData, setReportStatusData] = useState([]);
+  const [reportsByDistrict, setReportsByDistrict] = useState([]);
+  const [recentReports, setRecentReports] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getDepartment_statistics_3();
+      //  setData(result);
+     setStats({
+      totalReports:result[0].totalReports,
+      openReports: result[0].openReports,
+      inProgressReports: 34,
+      closedReports: result[0].closedReports,
+      totalDepartments:result[0].totalDepartments,
+      totalEmployees:result[0].totalEmployees,
+    });
+        alert(JSON.stringify(result));
+        // النتيجة الفعلية من السيرفر
+      } catch (error) {
+        console.error("حدث خطأ أثناء جلب البيانات:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  // محاكاة جلب البيانات
+  useEffect(() => {
+    // إحصائيات سريعة
+    
+
+    // بيانات لأنواع البلاغات
+    setReportTypesData([
+      { id: 1, type: 'سرقة', count: 42 },
+      { id: 2, type: 'عنف', count: 28 },
+      { id: 3, type: 'مخدرات', count: 19 },
+      { id: 4, type: 'مرور', count: 35 },
+      { id: 5, type: 'أخرى', count: 18 }
+    ]);
+
+    // بيانات حالة البلاغات
+    setReportStatusData([
+      { id: 1, status: 'مفتوحة', value: 56, color: '#ff6384' },
+      { id: 2, status: 'قيد المعالجة', value: 34, color: '#36a2eb' },
+      { id: 3, status: 'مغلقة', value: 52, color: '#4bc0c0' }
+    ]);
+
+    // بيانات حسب المنطقة
+setReportsByDistrict([
+  { district: 'مديرية القاهرة', count: 47 },
+  { district: 'مديرية المسراخ', count: 62 },
+  { district: 'مديرية السلاخنة', count: 23 }
+]);
+
+    // أحدث البلاغات
+    setRecentReports([
+      { id: 101, type: 'سرقة', date: '2023-10-15', status: 'مفتوحة' },
+      { id: 102, type: 'عنف', date: '2023-10-14', status: 'قيد المعالجة' },
+      { id: 103, type: 'مرور', date: '2023-10-14', status: 'مغلقة' },
+      { id: 104, type: 'مخدرات', date: '2023-10-13', status: 'مفتوحة' },
+      { id: 105, type: 'أخرى', date: '2023-10-12', status: 'قيد المعالجة' }
+    ]);
+  }, []);
+
+  return (
+    <Box sx={{ flexGrow: 1, p: 5}}>
+      <Typography variant="h4" gutterBottom>
+        لوحة تحكم نظام الإبلاغ
+      </Typography>
+      
+      {/* بطاقات الإحصائيات السريعة */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                إجمالي البلاغات
+              </Typography>
+              <Typography variant="h4" component="div">
+                {stats.totalReports}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                بلاغات مفتوحة
+              </Typography>
+              <Typography variant="h4" component="div" color="error">
+                {stats.openReports}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                قيد المعالجة
+              </Typography>
+              <Typography variant="h4" component="div" color="primary">
+                {stats.inProgressReports}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                بلاغات مغلقة
+              </Typography>
+              <Typography variant="h4" component="div" color="success">
+                {stats.closedReports}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                عدد الأقسام
+              </Typography>
+              <Typography variant="h4" component="div">
+                {stats.totalDepartments}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={2}>
+          <Card>
+            <CardContent>
+              <Typography color="textSecondary" gutterBottom>
+                عدد الموظفين
+              </Typography>
+              <Typography variant="h4" component="div">
+                {stats.totalEmployees}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* الرسوم البيانية */}
+      <Grid container spacing={3}>
+        {/* رسم بياني لأعداد البلاغات حسب النوع */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              البلاغات حسب النوع
+            </Typography>
+            <BarChart
+              xAxis={[{ 
+                scaleType: 'band', 
+                data: reportTypesData.map(item => item.type),
+                label: 'نوع البلاغ'
+              }]}
+              series={[{ 
+                data: reportTypesData.map(item => item.count),
+                label: 'عدد البلاغات'
+              }]}
+              width={500}
+              height={300}
+            />
+          </Paper>
+        </Grid>
+
+        {/* رسم بياني دائري لحالة البلاغات */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              حالة البلاغات
+            </Typography>
+            <PieChart
+              series={[{
+                data: reportStatusData.map(item => ({
+                  id: item.id,
+                  value: item.value,
+                  label: item.status
+                }))
+              }]}
+              width={400}
+              height={200}
+            />
+          </Paper>
+        </Grid>
+
+        {/* رسم بياني لتوزيع البلاغات حسب المنطقة */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              توزيع البلاغات حسب المنطقة
+            </Typography>
+            <BarChart
+              xAxis={[{ 
+                scaleType: 'band', 
+                data: reportsByDistrict.map(item => item.district),
+                label: 'المنطقة'
+              }]}
+              series={[{ 
+                data: reportsByDistrict.map(item => item.count),
+                label: 'عدد البلاغات'
+              }]}
+              width={500}
+              height={300}
+            />
+          </Paper>
+        </Grid>
+
+        {/* جدول أحدث البلاغات */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              أحدث البلاغات
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>رقم البلاغ</TableCell>
+                    <TableCell>النوع</TableCell>
+                    <TableCell>التاريخ</TableCell>
+                    <TableCell>الحالة</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {recentReports.map((report) => (
+                    <TableRow key={report.id}>
+                      <TableCell>{report.id}</TableCell>
+                      <TableCell>{report.type}</TableCell>
+                      <TableCell>{report.date}</TableCell>
+                      <TableCell>
+                        <Box 
+                          sx={{ 
+                            display: 'inline-block',
+                            px: 1,
+                            borderRadius: 1,
+                            backgroundColor: 
+                              report.status === 'مفتوحة' ? '#ffcdd2' :
+                              report.status === 'قيد المعالجة' ? '#bbdefb' : '#c8e6c9'
+                          }}
+                        >
+                          {report.status}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+export default HomePage;
+

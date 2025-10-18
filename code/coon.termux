@@ -1,0 +1,9 @@
+php -d error_reporting=0 -S 127.0.0.1:8081 -t ~/htdocs/phpmyadmin
+
+cd ~/wphone-main/code
+php -S 127.0.0.1:8084
+
+
+mariadbd --datadir=/data/data/com.termux/files/usr/var/lib/mysql
+
+npm run dev -- --host

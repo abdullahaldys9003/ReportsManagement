@@ -1,0 +1,280 @@
+//
+import {
+  Box,
+  Typography,
+  Tooltip,
+  IconButton,
+  Button,
+} from '@mui/material';
+import { useMemo, useEffect, useState } from 'react';
+
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+  MRT_EditActionButtons
+} from 'material-react-table';
+
+import { useHooksApi } from "./useHooksApi";
+import { useDataStore } from "../store/dataStore.js";
+//import { validateEmployeeInput, validateEmployeeOnSubmit } from './validation';
+
+const {
+    handleCreate,
+    handleDelete,
+    handleSaveUpdate,
+  } = useHooksApi();
+
+import { mapToSelectOptions,filterByIdWithValueLabel } from "../helps/filtersValueLable.js"; 
+import { getAllItems } from '../api/crudApi.js';
+
+
+const getDepartments = async () => {
+  const result = await getAllItems("index.php", {
+    tableName: "departments",
+    operation: 'getDepartments'
+  });
+  if(result.status="success")
+  return result.data;
+  else alert(result.message);
+};
+
+
+
+export default function DepartmentManager() {
+  
+  const [dataDataReportMain, setDataReportMain] = useState([]);
+  const [dataDepartments, setDatagetDepartments] = useState([]);
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const [selectDistrictsId, setSelectdistrictId] = useState(null);
+
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resultDataDepartment = await getDepartments();
+        setDatagetDepartments(resultDataDepartment);
+        
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+
+ const { 
+    districts, 
+    loading,
+    neighborhoods,
+    fetchAllData,
+    initialized 
+  } = useDataStore();
+
+useEffect(() => {
+    // الجلب يحدث فقط إذا لم يتم التهيئة بعد
+
+    if (!initialized) {
+      fetchAllData();
+    }
+  }, [initialized, fetchAllData]);
+  
+const filterDataDepartments = () => {
+    return dataDepartments.map(item => ({
+      value: item.id,
+      label: item.department_name
+    }));
+  }
+
+  const columns = useMemo(() => [
+  { 
+      accessorKey: 'id', 
+      header: 'المعرف', 
+      size: 80,
+      enableEditing: false,
+    },
+  { 
+      accessorKey: 'department_name', 
+      header: 'اسم القسم', 
+      size: 150,
+      editVariant: 'custom',
+      
+    },
+  { 
+      accessorKey: 'districts_id', 
+      header: 'اسم المديرية', 
+      size: 150,
+      editVariant: 'custom',
+      editVariant: 'select',
+      editSelectOptions: mapToSelectOptions(districts,"id","name"),
+      muiEditTextFieldProps: {  
+        select: true,
+         onChange: async (e) => {
+          const districtId = e.target.value;
+          setSelectdistrictId(districtId);
+         
+          // تصفية الأحياء حسب المديرية
+          
+         
+          // تصفية الأحياء المعزولة حسب المديرية
+          
+        },
+      },
+       Cell: ({ cell }) => {
+        const districtId = cell.getValue();
+      //  alert(districtId);
+        const district = districts.find(d => d.id === districtId);
+        return district ? district.name : 'غير محدد';
+      }
+    },
+   { 
+      accessorKey: 'neighborhoods_id', 
+      header: 'اسم الحي', 
+      size: 150,
+      editVariant: 'custom',
+        editSelectOptions:filterByIdWithValueLabel(neighborhoods,selectDistrictsId,"district_id","neighborhood_name"),
+          muiEditTextFieldProps: {  
+        select: true,
+      },
+       Cell: ({ cell }) => {
+        const neighborhoodId = cell.getValue();
+
+      //  alert(districtId);
+        const neighborhood = neighborhoods.find(n => n.neighborhood_id == neighborhoodId);
+       //   alert(neighborhood);
+        return neighborhood ? neighborhood.neighborhood_name : '';
+    },
+  },
+  { 
+      accessorKey: 'created_at', 
+      header: 'تاريخ الانشاء', 
+      size: 150,
+     enableEditing: false,
+      editVariant: 'custom',
+    },
+  { 
+      accessorKey: 'address', 
+      header: 'العنوان', 
+      size: 150,
+      editVariant: 'custom',
+    },
+  { 
+  accessorKey: 'type', 
+  header: 'نوع القسم', 
+  size: 150,
+  editVariant: 'custom',
+  editVariant: 'select',
+  editSelectOptions: [
+    { value: 'police', label: 'قسم شرطة' },
+    { value: 'point', label: 'نقطة تفتيش' },
+  ],
+},
+],[districts,selectDistrictsId]);
+
+  // وظيفة التحقق قبل الحفظ
+  const handleSaveWithValidation = async ({ values, table, row }) => {
+    /*
+    const isEdit = !!row;
+    const validationResult = validateEmployeeOnSubmit(values, isEdit);
+    
+    if (!validationResult.isValid) {
+      setValidationErrors(validationResult.errors);
+      return;
+    }
+    
+    //setValidationErrors({});
+     await handleCreate({ values, table });
+   /* 
+    if (isEdit) {
+      await handleSaveUpdate({ values, table, row });
+    } else {
+      await handleCreate({ values, table });
+    }*/
+  };
+
+  // وظيفة التحقق أثناء الكتابة
+  const handleValidateField = (cell, value) => {
+    const field = cell.column.columnDef.accessorKey;
+    const tempData = { [field]: value };
+    const validationResult = validateEmployeeInput(tempData);
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [field]: validationResult.errors[field]
+    }));
+  };
+
+  const table = useMaterialReactTable({
+    columns,
+    data: dataDepartments || [],
+    createDisplayMode: 'modal',
+    editDisplayMode: 'modal',
+    enableEditing: true,
+    enableRtl: true,
+    muiTableContainerProps: {
+      sx: {
+       maxWidth:'800px',
+        maxHeight: '600px',
+        overflow: 'auto',
+      },
+    },
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="تعديل">
+          <IconButton onClick={() => {
+            setValidationErrors({});
+            table.setEditingRow(row);
+          }}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="حذف">
+          <IconButton color="error" onClick={()=> {handleDelete(row, table)}} >
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="عرض التفاصيل">
+          <IconButton color="primary">
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+   
+    onEditingRowSave: handleCreate,
+    onCreatingRowSave: handleSaveWithValidation,
+    onCreatingRowCancel: () => setValidationErrors({}),
+    onEditingRowCancel: () => setValidationErrors({}),
+    renderTopToolbarCustomActions: ({ table }) => (
+      <Button
+        variant="contained"
+        size="small"
+        onClick={() => {
+          setValidationErrors({});
+          table.setCreatingRow(true);
+        }}
+      >
+        إضافة  
+      </Button>
+    ),
+    muiTablePaperProps: {
+      elevation: 2,
+      sx: {
+        borderRadius: 2,
+      },
+    },
+  });
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', textAlign: 'center' }}>
+        إدارة الاقسام  
+      </Typography>
+      <MaterialReactTable table={table} />
+    </Box>
+  );
+}

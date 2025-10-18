@@ -1,0 +1,40 @@
+
+/*
+
+.pre-code {
+  color: white;
+  border-radius: 10px;
+  box-shadow: 2px 10px 10px black;
+  background: #07223F;
+  padding: 10px;
+}
+
+body {
+  background-color: #020F1B;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+footer a i {
+  color: white;
+}
+
+
+
+body {
+  color: white!important; 
+
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  
+  color: white; 
+  
+}
+
+
+*/
+
+.fa-icon {
+  color: white !important; 
+}
