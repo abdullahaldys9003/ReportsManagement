@@ -16,6 +16,7 @@ import {
 
 const emp = async () => {
   const data= await getAllItems("index.php", { tableName: "employees", operation: "show" });
+  alert(data);
   return data;
 }
 
