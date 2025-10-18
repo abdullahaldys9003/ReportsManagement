@@ -11,6 +11,7 @@
 // =====================
 // 1️⃣ إضافة سجل جديد
 // =====================
+require_once 'conn.php';
 function addDepartment($data) {
     $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
     if ($conn->connect_error) {
@@ -137,10 +138,7 @@ function getDepartmentById($id) {
 
 
 function getDepartments() {
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
-    if ($conn->connect_error) {
-        return ["success" => false, "message" => "فشل الاتصال: " . $conn->connect_error];
-    }
+     $conn = createConnection();
 
     $sql = "SELECT *,d.name AS     districts_name FROM department AS dep 
        LEFT JOIN districts d ON dep.districts_id = d.id

@@ -25,6 +25,7 @@ const getDashboardData = async () => {
     tableName: "reports",
     operation: 'getDashboardStatistics'
   });
+  alert(result);
   if(result.status="success")
   return result;
   else alert(result.message);

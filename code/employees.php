@@ -2,12 +2,9 @@
 // =====================
 // 1️⃣ دالة إضافة موظف
 // =====================
+require_once 'conn.php';
 function addEmployee($data) {
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
-    if ($conn->connect_error) {
-        return ["success" => false, "message" => "فشل الاتصال: " . $conn->connect_error];
-    }
-    $conn->set_charset("utf8mb4");
+    $conn = createConnection();
 
     try {
         // التحقق من وجود البريد الإلكتروني
@@ -61,9 +58,7 @@ function addEmployee($data) {
 // 2️⃣ دالة تعديل موظف
 // =====================
 function updateEmployee($id, $data) {
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
-    if ($conn->connect_error) die("فشل الاتصال: " . $conn->connect_error);
-    $conn->set_charset("utf8mb4");
+$conn = createConnection();
 
     $stmt = $conn->prepare("
         UPDATE employees SET 
@@ -110,18 +105,7 @@ function deleteEmployee($id) {
         ];
     }
 
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
-    
-    // التحقق من الاتصال بقاعدة البيانات
-    if ($conn->connect_error) {
-        return [
-            'success' => false,
-            'message' => 'فشل الاتصال بقاعدة البيانات: ' . $conn->connect_error,
-            'data' => null
-        ];
-    }
-    
-    $conn->set_charset("utf8mb4");
+    $conn = createConnection();
     
     try {
         $stmt = $conn->prepare("DELETE FROM employees WHERE employee_id = ?");
@@ -176,10 +160,7 @@ function deleteEmployee($id) {
 // 4️⃣ دالة عرض الموظفين
 // =====================
 function getEmployees() {
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
-    if ($conn->connect_error) die("فشل الاتصال: " . $conn->connect_error);
-    $conn->set_charset("utf8mb4");
-
+    $conn = createConnection();
     $result = $conn->query("SELECT * , dep.department_name FROM employees emp
       INNER JOIN  department dep ON emp.department_id = dep.id
   ");
@@ -194,9 +175,8 @@ function getEmployees() {
 }
 
 function getEmployeeById($id) {
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
-    if ($conn->connect_error) die("فشل الاتصال: " . $conn->connect_error);
-    $conn->set_charset("utf8mb4");
+  
+  $conn = createConnection();
 
     // استخدام prepared statement للحماية من SQL injection
     $stmt = $conn->prepare("SELECT emp.*, dep.department_name,

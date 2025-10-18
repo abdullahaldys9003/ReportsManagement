@@ -2,7 +2,7 @@
 //PoliceDepartments
 //operationPoliceDepartments
 //
-include("conn.php");
+require_once 'conn.php';
 /*
 function getPoliceDepartmentsReports($department_id) {
     // إنشاء الاتصال

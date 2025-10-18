@@ -20,23 +20,17 @@ const fullOrigin = window.location.origin; // "http://10.1.10.1:5173"
 
 // إزالة البروتوكول والبوابة للحصول على IP فقط
 const ipOnly = fullOrigin.replace(/^https?:\/\//, '').split(':')[0];
-
+/*
 const api = axios.create({
   baseURL: `http://${ipOnly}:8084`,
+});*/
+
+const api = axios.create({
+  baseURL: 'https://databasepro.infinityfreeapp.com',
+  timeout: 10000,
 });
 
 
-
-export const getPersons = async () => {
-  const response = await api.get('/get_users');
- // alert(response.data);
-  return response.data;
-};
-
-export const createPerson = async (values) => {
-  const response = await api.post('/add_user', values);
-  return response.data;
-};
 
 export const updateItem = async (items= null, resourceName, params = null) => {
   try {

@@ -1,7 +1,16 @@
 <?php
+
+
+
 // إنشاء اتصال منفصل
 function createConnection() {
-    $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
+$host = "sql12.freesqldatabase.com";
+$username = "sql12803599";
+$password = "cFCHQzjydv";
+$database = "sql12803599";
+$port = 3306;
+$conn = new mysqli($host, $username, $password, $database, $port);
+
     if ($conn->connect_error) {
         return ["status" => "error", "message" => "فشل الاتصال: " . $conn->connect_error];
     }

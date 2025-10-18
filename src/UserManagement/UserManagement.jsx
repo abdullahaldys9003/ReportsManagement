@@ -23,7 +23,7 @@ const [notifSeverity, setNotifSeverity] = useState('success');
 const handelCreateItem = async ({ values }) => {
   const params = { tableName: "employees", operation: "add" };
   const data = await createItem(values, "index.php", params);
-   alert(JSON.stringify(data));
+   //alert(JSON.stringify(data));
   if (data.success) {
     setUsersData([...usersData, values]);
     setNotifMessage("تم إضافة الموظف بنجاح");
@@ -107,6 +107,7 @@ const handleDelete = async (row) => {
     tableName: "employees", 
     operation: "show" 
   });
+
    setUsersData(result);
   //  alert(JSON.stringify(result));
 }

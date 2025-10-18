@@ -716,9 +716,144 @@ function getPendingManagementReportsByDepartment($departmentId = 1, $limit = 5, 
 
 
 
-
+/*
 function getDashboardStatistics() {
     $conn = new mysqli("localhost:3306", "root", "root", "departments_system");
+    if ($conn->connect_error) {
+        return ["status" => "error", "message" => "فشل الاتصال: " . $conn->connect_error];
+    }
+    $conn->set_charset("utf8mb4");
+
+    $result = [];
+
+    // 1. الإحصائيات الأساسية - البلاغات المرسلة للإدارة
+    $stats_sql = "
+        SELECT 
+            (SELECT COUNT(*) FROM reports r 
+             INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id 
+             WHERE r.archive = 0 AND drr.sent_to_management = TRUE) as totalReports,
+            
+            (SELECT COUNT(*) FROM reports r 
+             INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id 
+             WHERE r.status_report = 'opened' AND r.archive = 0 
+             AND drr.sent_to_management = TRUE) as openReports,
+            
+            (SELECT COUNT(*) FROM reports r 
+             INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id 
+             WHERE r.status_report = 'prosse' AND r.archive = 0 
+             AND drr.sent_to_management = TRUE) as inProgressReports,
+            
+            (SELECT COUNT(*) FROM reports r 
+             INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id 
+             WHERE r.status_report = 'closed' AND r.archive = 0 
+             AND drr.sent_to_management = TRUE) as closedReports,
+            
+            (SELECT COUNT(*) FROM department) as totalDepartments,
+            (SELECT COUNT(*) FROM employees) as totalEmployees
+    ";
+    $stats_result = $conn->query($stats_sql);
+    $result['stats'] = $stats_result->fetch_assoc();
+
+    // 2. أنواع البلاغات المرسلة
+    $types_sql = "
+        SELECT 
+            rmt.type_name as type,
+            COUNT(r.report_id) as count
+        FROM reports r
+        INNER JOIN report_main_types rmt ON r.main_id = rmt.id
+        INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id
+        WHERE r.archive = 0 
+        AND drr.sent_to_management = TRUE
+        GROUP BY rmt.type_name
+        ORDER BY count DESC
+        LIMIT 5
+    ";
+    $types_result = $conn->query($types_sql);
+    $result['reportTypes'] = [];
+    while ($row = $types_result->fetch_assoc()) {
+        $result['reportTypes'][] = $row;
+    }
+
+    // 3. حالة البلاغات المرسلة
+    $status_sql = "
+        SELECT 
+            r.status_report as status,
+            COUNT(*) as value
+        FROM reports r
+        INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id
+        WHERE r.archive = 0 
+        AND drr.sent_to_management = TRUE
+        GROUP BY r.status_report
+    ";
+    $status_result = $conn->query($status_sql);
+    $result['reportStatus'] = [];
+    $status_colors = ['opened' => '#ff6384', 'prosse' => '#36a2eb', 'closed' => '#4bc0c0'];
+    while ($row = $status_result->fetch_assoc()) {
+        $result['reportStatus'][] = [
+            'status' => $row['status'],
+            'value' => $row['value'],
+            'color' => $status_colors[$row['status']] ?? '#cccccc'
+        ];
+    }
+
+    // 4. البلاغات المرسلة حسب المنطقة
+    $districts_sql = "
+        SELECT 
+            d.name as district,
+            COUNT(r.report_id) as count
+        FROM reports r
+        INNER JOIN districts d ON r.districts_id = d.id
+        INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id
+        WHERE r.archive = 0 
+        AND drr.sent_to_management = TRUE
+        GROUP BY d.name
+        ORDER BY count DESC
+        LIMIT 5
+    ";
+    $districts_result = $conn->query($districts_sql);
+    $result['reportsByDistrict'] = [];
+    while ($row = $districts_result->fetch_assoc()) {
+        $result['reportsByDistrict'][] = $row;
+    }
+
+    // 5. أحدث البلاغات المرسلة
+    $recent_sql = "
+        SELECT 
+            r.report_id as id,
+            rmt.type_name as type,
+            r.created_at as date,
+            r.status_report as status,
+          dp.department_name
+        FROM reports r
+        INNER JOIN report_main_types rmt ON r.main_id = rmt.id
+        INNER JOIN department_report_reviews drr ON r.report_id = drr.report_id
+        INNER JOIN department dp ON drr.department_id = dp.id
+        WHERE r.archive = 0 
+        AND drr.sent_to_management = TRUE
+        ORDER BY r.created_at DESC
+        LIMIT 5
+    ";
+    $recent_result = $conn->query($recent_sql);
+    $result['recentReports'] = [];
+    while ($row = $recent_result->fetch_assoc()) {
+        $result['recentReports'][] = $row;
+    }
+
+    $conn->close();
+    return ["status" => "success", "data" => $result];
+}
+*/
+
+
+
+
+function getDashboardStatistics() {
+      $host = "sql12.freesqldatabase.com";
+    $username = "sql12803599";
+    $password = "cFCHQzjydv";
+    $database = "sql12803599";
+    $port = 3306;
+  $conn = new mysqli($host, $username, $password, $database, $port);
     if ($conn->connect_error) {
         return ["status" => "error", "message" => "فشل الاتصال: " . $conn->connect_error];
     }
